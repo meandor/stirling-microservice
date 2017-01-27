@@ -6,6 +6,6 @@ sudo: false
 
 before_script:
   - composer self-update
-  - composer install --prefer-source --no-interaction --dev
+  - composer install
 
-script: phpunit ./tests
+script: ./bin/go test
