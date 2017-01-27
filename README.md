@@ -6,6 +6,7 @@
 [![Monthly Downloads](https://poser.pugx.org/meandor/stirling-microservice/d/monthly)](https://packagist.org/packages/meandor/stirling-microservice)
 [![Daily Downloads](https://poser.pugx.org/meandor/stirling-microservice/d/daily)](https://packagist.org/packages/meandor/stirling-microservice)
 [![composer.lock](https://poser.pugx.org/meandor/stirling-microservice/composerlock)](https://packagist.org/packages/meandor/stirling-microservice)
+[![Build Status](https://travis-ci.org/meandor/stirling-microservice.svg?branch=master)](https://travis-ci.org/meandor/stirling-microservice)
 
 A PHP microservice named after the super famous inventor of the stirling engine.
 
