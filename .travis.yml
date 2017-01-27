@@ -3,3 +3,5 @@ php:
   - '7.0'
 
 sudo: false
+
+script: phpunit ./tests
