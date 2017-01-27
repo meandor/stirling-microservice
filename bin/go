@@ -1,6 +1,32 @@
 #!/usr/bin/env bash
-docker stop stirling-microservice
-docker rm stirling-microservice
-set -eu
-docker build -t stirling-microservice .
-docker run --name stirling-microservice --publish 8080:80 stirling-microservice
+SCRIPT_DIR=$(dirname $0)
+
+goal_start() {
+  echo 'Deleting old docker context'
+  docker stop stirling-microservice
+  docker rm stirling-microservice
+  set -eu
+  echo 'Starting docker container on port 8080'
+  docker build -t stirling-microservice .
+  docker run --name stirling-microservice --publish 8080:80 stirling-microservice
+}
+
+function help {
+    echo "usage: $0 <task>
+task can be:
+    help             -- This help message
+    start            -- Builds a docker container and starts it
+                     -- Anything else accepted by composer
+    "
+}
+
+if [ "$1" == "help" ]; then
+    help
+elif [ "$1" == "start" ]; then
+    goal_start
+else
+    php ${SCRIPT_DIR}/composer.phar $*
+fi
+
+
+
