@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+docker stop stirling-microservice
+docker rm stirling-microservice
+set -eu
+docker build -t stirling-microservice .
+docker run --name stirling-microservice --publish 8080:80 stirling-microservice

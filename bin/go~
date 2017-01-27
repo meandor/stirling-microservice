@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+docker stop wendelkneter
+docker rm wendelkneter
+set -eu
+docker build -t wendelkneter .
+docker run --name wendelkneter --publish 8080:80 wendelkneter
