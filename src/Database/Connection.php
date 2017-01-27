@@ -1,5 +1,5 @@
 <?php
-namespace Database;
+namespace Stirling\Database;
 
 interface Connection
 {

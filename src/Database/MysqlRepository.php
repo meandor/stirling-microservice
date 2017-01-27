@@ -1,6 +1,6 @@
 <?php
 
-namespace Database;
+namespace Stirling\Database;
 
 abstract class MysqlRepository implements Repository
 {
