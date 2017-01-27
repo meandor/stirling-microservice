@@ -11,3 +11,19 @@
 A PHP microservice named after the super famous inventor of the stirling engine.
 
 It is not very effective, but its moving!
+
+## Usage
+The main script to do everything is
+````bash
+./bin/go
+````
+
+To see a list of arguments:
+````bash
+./bin/go help
+````
+
+To execute all tests:
+````bash
+./bin/go test
+````

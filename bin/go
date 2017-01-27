@@ -1,16 +1,6 @@
 #!/usr/bin/env bash
 SCRIPT_DIR=$(dirname $0)
 
-goal_start() {
-  echo 'Deleting old docker context'
-  docker stop stirling-microservice
-  docker rm stirling-microservice
-  set -eu
-  echo 'Starting docker container on port 8080'
-  docker build -t stirling-microservice .
-  docker run --name stirling-microservice --publish 8080:80 stirling-microservice
-}
-
 goal_test() {
   ${SCRIPT_DIR}/../vendor/bin/phpunit --colors=always ${SCRIPT_DIR}/../tests
 }
@@ -21,15 +11,12 @@ task can be:
     help             -- This help message
     install          -- Installs all dependencies
     test             -- Runs all tests
-    start            -- Builds a docker container and starts it on port 8080
                      -- Anything else accepted by composer
     "
 }
 
 if [ "$1" == "help" ]; then
     help
-elif [ "$1" == "start" ]; then
-    goal_start
 elif [ "$1" == "test" ]; then
     goal_test
 else
