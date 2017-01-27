@@ -37,7 +37,7 @@ Router::init();
 
 Router::run();
 ````
-This will start the Router. If you want to add routes places this
+This will start the Router. If you want to add routes place this
 in between the init and run:
  
 ````php
