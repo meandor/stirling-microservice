@@ -56,7 +56,7 @@ To access your config parameters use the Config class.
 default.json content (placed in root folder):
 ````json
 {
-    "foo": "bar";
+    "foo": "bar"
 }
 ````
 
