@@ -21,7 +21,7 @@ task can be:
     help             -- This help message
     install          -- Installs all dependencies
     test             -- Runs all tests
-    start            -- Builds a docker container and starts it
+    start            -- Builds a docker container and starts it on port 8080
                      -- Anything else accepted by composer
     "
 }
