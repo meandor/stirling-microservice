@@ -1,0 +1,18 @@
+{
+  "name": "meandor/stirling-microservice",
+  "description": "A PHP Microservice",
+  "type": "library",
+  "homepage": "https://github.com/meandor/stirling-microservice",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Daniel Schruhl",
+      "email": "danielschruhl@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "version": "0.1.0",
+  "require": {
+    "php": "^7.0"
+  }
+}
