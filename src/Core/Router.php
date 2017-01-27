@@ -17,6 +17,14 @@ class Router
         } else {
             self::$path = '';
         }
+
+        self::add('info', function () {
+            phpinfo();
+        });
+
+        self::add('health', function () {
+            echo "HEALTHY";
+        });
     }
 
     public static function add($expression, $function)
