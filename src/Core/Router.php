@@ -18,13 +18,7 @@ class Router
             self::$path = '';
         }
 
-        self::add('info', function () {
-            phpinfo();
-        });
-
-        self::add('health', function () {
-            echo "HEALTHY";
-        });
+        self::addDefaultRoutes();
     }
 
     public static function add($expression, $function)
@@ -64,5 +58,16 @@ class Router
                 call_user_func_array($route404, Array(self::$path));
             }
         }
+    }
+
+    private static function addDefaultRoutes()
+    {
+        self::add('info', function () {
+            phpinfo();
+        });
+
+        self::add('health', function () {
+            echo "HEALTHY";
+        });
     }
 }
