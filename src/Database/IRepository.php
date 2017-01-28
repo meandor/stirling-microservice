@@ -2,7 +2,7 @@
 namespace Stirling\Database;
 
 
-interface Repository
+interface IRepository
 {
     public function fetchAll();
 

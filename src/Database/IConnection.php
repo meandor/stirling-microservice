@@ -1,7 +1,7 @@
 <?php
 namespace Stirling\Database;
 
-interface Connection
+interface IConnection
 {
     public static function Instance();
 
