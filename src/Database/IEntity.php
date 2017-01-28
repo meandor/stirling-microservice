@@ -11,4 +11,6 @@ namespace Stirling\Database;
 interface IEntity
 {
     public function getKey();
+
+    public function getProperties();
 }
