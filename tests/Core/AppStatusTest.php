@@ -29,7 +29,7 @@ class AppStatusTest extends TestCase
         } catch (Exception $e) {
 
         }
-        #file_put_contents("./default.json", "{\"name\":\"foobar\",\"version\":\"1.3.3.7\",\"config1\":\"value\"}");
+        file_put_contents("./default.json", "{\"name\":\"foobar\",\"version\":\"1.3.3.7\",\"config1\":\"value\"}");
         $actual = AppStatus::instance()->getStatusArray();
         $expected = array(
             "application" => array(
