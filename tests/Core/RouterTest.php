@@ -1,7 +1,7 @@
 <?php
 namespace Stirling\Core;
 
-use PHPUnit\Framework\TestCase;
+use \PHPUnit\Framework\TestCase;
 
 class RouterTest extends TestCase
 {
