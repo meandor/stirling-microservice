@@ -62,12 +62,16 @@ class Router
 
     private static function addDefaultRoutes()
     {
+        self::add('health', function () {
+            echo "HEALTHY";
+        });
+
         self::add('info', function () {
             phpinfo();
         });
 
-        self::add('health', function () {
-            echo "HEALTHY";
+        self::add('status', function () {
+            AppStatus::instance()->buildStatusPage();
         });
     }
 }
