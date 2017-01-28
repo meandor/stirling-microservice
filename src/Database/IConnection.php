@@ -14,7 +14,7 @@ interface IConnection
      * Method to get the connection instance.
      * @return IConnection Database Connection instance
      */
-    public static function Instance();
+    public static function Instance(): IConnection;
 
     /**
      * Returns the db link

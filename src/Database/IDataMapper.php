@@ -15,5 +15,5 @@ interface IDataMapper
      * @param $dbData array raw data from the database
      * @return IEntity
      */
-    function createEntity($dbData);
+    function createEntity(array $dbData): IEntity;
 }
