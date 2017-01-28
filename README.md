@@ -71,3 +71,15 @@ will output "bar"
 
 You can pass another file name as a string into the static instance
 method of Config if you want to use another config json file.
+
+## Status
+Under `http://<location>/status` you can take a look at the app status. It aggregates
+ registered status functions.
+ 
+To register a new status:
+````php
+$status = AppStatus::instance();
+$status->registerStatus("status 1", "Descriptive message for this status", function () {
+    return true;
+});
+````
