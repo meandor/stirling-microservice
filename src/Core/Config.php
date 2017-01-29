@@ -25,7 +25,7 @@ class Config
         }
     }
 
-    public static function instance($configPath = "./resources/default.json")
+    public static function instance($configPath = __DIR__ . "/../../resources/default.json")
     {
         if (self::$instance == null) {
             self::$instance = new Config($configPath);

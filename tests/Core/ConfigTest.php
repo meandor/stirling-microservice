@@ -16,19 +16,25 @@ class TestingConfig extends Config
 class ConfigTest extends TestCase
 {
 
-    const DEFAULT_JSON = "./default.json";
+    const CONFIG_JSON = __DIR__ . "/../resources/default.json";
 
     protected function tearDown()
     {
         parent::tearDown();
         TestingConfig::destroy();
+
+        try {
+            unlink(self::CONFIG_JSON);
+        } catch (Exception $e) {
+
+        }
     }
 
 
     public function testCreateConfigSingleton()
     {
-        $expected = TestingConfig::instance();
-        $actual = TestingConfig::instance();
+        $expected = TestingConfig::instance(self::CONFIG_JSON);
+        $actual = TestingConfig::instance(self::CONFIG_JSON);
         $this->assertEquals($expected, $actual);
     }
 
@@ -37,21 +43,16 @@ class ConfigTest extends TestCase
      */
     public function testNotExistentConfigProperty()
     {
-        $actual = TestingConfig::instance();
+        $actual = TestingConfig::instance(self::CONFIG_JSON);
         $actual->foobar;
         $this->expectExceptionMessage("Property 'foobar' does not exist");
     }
 
     public function testGetExistentPropertyValue()
     {
-        try {
-            unlink(self::DEFAULT_JSON);
-        } catch (Exception $e) {
-
-        }
-
-        file_put_contents(self::DEFAULT_JSON, "{\"foo\":\"bar\"}");
-        $actual = TestingConfig::instance();
+        file_put_contents(self::CONFIG_JSON, "{\"foo\":\"bar\"}");
+        var_dump(file_get_contents(self::CONFIG_JSON));
+        $actual = TestingConfig::instance(self::CONFIG_JSON);
         $this->assertEquals("bar", $actual->foo);
     }
 
@@ -60,14 +61,8 @@ class ConfigTest extends TestCase
      */
     public function testGetMissingPropertyValueFromCorrectFile()
     {
-        try {
-            unlink(self::DEFAULT_JSON);
-        } catch (Exception $e) {
-
-        }
-
-        file_put_contents(self::DEFAULT_JSON, "{\"foo\":\"bar\"}");
-        $actual = TestingConfig::instance();
+        file_put_contents(self::CONFIG_JSON, "{\"foo\":\"bar\"}");
+        $actual = TestingConfig::instance(self::CONFIG_JSON);
         $actual->foobar;
         $this->expectExceptionMessage("Property 'foobar' does not exist");
     }
@@ -77,32 +72,9 @@ class ConfigTest extends TestCase
      */
     public function testMalformedJson()
     {
-        try {
-            unlink(self::DEFAULT_JSON);
-        } catch (Exception $e) {
-
-        }
-
-        file_put_contents(self::DEFAULT_JSON, "{foo\":\"bar\"}");
-        $actual = TestingConfig::instance();
+        file_put_contents(self::CONFIG_JSON, "{foo\":\"bar\"}");
+        $actual = TestingConfig::instance(self::CONFIG_JSON);
         $actual->foo;
         $this->expectExceptionMessage("Property 'foo' does not exist");
     }
-
-    public function testDifferentConfigJsonFile()
-    {
-        $configPath = "./foo.json";
-        try {
-            unlink(self::DEFAULT_JSON);
-            unlink($configPath);
-        } catch (Exception $e) {
-
-        }
-
-        file_put_contents($configPath, "{\"foobar\":\"42\"}");
-        $actual = Config::instance($configPath);
-        $this->assertEquals("42", $actual->foobar);
-    }
-
-
 }

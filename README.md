@@ -48,7 +48,8 @@ Router::add('info', function () {
 This would add the php info page under `http://<location>/info`
 
 ## Config
-You can define global config parameters by adding a file called ``default.json`` into your root folder (where your index.php lies).
+You can define global config parameters by adding a file called ``default.json`` into a resources folder on your path root
+(where your index.php file should be).
 
 To access your config parameters use the Config class.
 

@@ -2,5 +2,4 @@
 .idea
 /vendor/
 composer.lock
-foo.json
-default.json
+/tests/resources/*.json

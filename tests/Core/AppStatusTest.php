@@ -1,7 +1,6 @@
 <?php
 namespace Stirling\Core;
 
-use Exception;
 use \PHPUnit\Framework\TestCase;
 
 class AppStatusTest extends TestCase
@@ -12,6 +11,8 @@ class AppStatusTest extends TestCase
 
     public function testSingletonAppStatus()
     {
+        file_put_contents(__DIR__ . "/../resources/default.json", "{\"name\":\"foobar\",\"version\":\"1.3.3.7\",\"config1\":\"value\"}");
+        Config::instance(__DIR__ . "/../resources/default.json");
         $actual = AppStatus::instance();
         $this->assertEquals(AppStatus::instance(), $actual);
     }
@@ -24,12 +25,6 @@ class AppStatusTest extends TestCase
 
     public function testEmptyStatusArray()
     {
-        try {
-            unlink("./default.json");
-        } catch (Exception $e) {
-
-        }
-        file_put_contents("./default.json", "{\"name\":\"foobar\",\"version\":\"1.3.3.7\",\"config1\":\"value\"}");
         $actual = AppStatus::instance()->getStatusArray();
         $expected = array(
             "application" => array(
@@ -60,12 +55,6 @@ class AppStatusTest extends TestCase
 
     public function testOneItemInStatusArray()
     {
-        try {
-            unlink("./default.json");
-        } catch (Exception $e) {
-
-        }
-        file_put_contents("./default.json", "{\"name\":\"foobar\",\"version\":\"1.3.3.7\",\"config1\":\"value\"}");
         $actual = AppStatus::instance()->getStatusArray();
         $expected = array(
             "application" => array(
@@ -97,12 +86,6 @@ class AppStatusTest extends TestCase
 
     public function testStatusArray()
     {
-        try {
-            unlink("./default.json");
-        } catch (Exception $e) {
-
-        }
-        file_put_contents("./default.json", "{\"name\":\"foobar\",\"version\":\"1.3.3.7\",\"config1\":\"value\"}");
         $actual = AppStatus::instance()->getStatusArray();
         $expected = array(
             "application" => array(
