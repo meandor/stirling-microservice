@@ -16,11 +16,9 @@ class Config
      */
     private function __construct($configPath)
     {
-        var_dump($configPath);
         $this->properties = Array("git" => null, "name" => null, "version" => null);
         if (file_exists($configPath)) {
             $json = json_decode(file_get_contents($configPath), true);
-            var_dump($json);
             if ($json != null) {
                 $this->properties = array_merge($this->properties, $json);
             }
