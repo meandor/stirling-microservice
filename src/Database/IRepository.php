@@ -20,9 +20,9 @@ interface IRepository
     /**
      * Returns the IEntity with the specified key from the database or null
      * @param $key string
-     * @return IEntity
+     * @return null|IEntity
      */
-    public function findOne($key): IEntity;
+    public function findOne($key): ?IEntity;
 
     /**
      * Deletes the given IEntity
@@ -33,8 +33,8 @@ interface IRepository
 
     /**
      * Saves and returns the given IEntity
-     * @param $entity
-     * @return mixed
+     * @param IEntity $entity
+     * @return null|IEntity
      */
-    public function save(IEntity $entity): IEntity;
+    public function save(IEntity $entity): ?IEntity;
 }
