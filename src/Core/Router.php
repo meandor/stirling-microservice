@@ -50,6 +50,7 @@ class Router
                 array_shift($matches);//Always remove first element. This contains the whole string
                 call_user_func_array($route['function'], $matches);
                 $route_found = true;
+                break;
             }
         }
 
