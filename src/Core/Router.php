@@ -74,5 +74,10 @@ class Router
         self::add('GET', 'status', function () {
             AppStatus::instance()->buildStatusPage();
         });
+
+        self::setNotFound(function () {
+            http_response_code(404);
+            exit(0);
+        });
     }
 }
