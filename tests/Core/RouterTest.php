@@ -1,20 +1,21 @@
 <?php
+
 namespace Stirling\Core;
 
-use \PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class RouterTest extends TestCase
 {
     public function testAddRoute()
     {
-        Router::add("foobar", function () {
+        Router::add("POST", "foobar", function () {
             return "1337";
         });
         $actual = Router::$routes;
         $this->assertEquals(1, count($actual));
-        $this->assertEquals("foobar", $actual[0]["expression"]);
-        $this->assertNotEmpty($actual[0]["function"]);
-        $this->assertEquals("1337", call_user_func($actual[0]["function"]));
+        $this->assertEquals("#^foobar$#", $actual[0]->getEndpointPattern());
+        $this->assertNotEmpty($actual[0]->getCallback());
+        $this->assertEquals("1337", call_user_func($actual[0]->getCallback()));
     }
 
     public function testAdd404Route()

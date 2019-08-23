@@ -21,12 +21,15 @@ class Router
         self::addDefaultRoutes();
     }
 
-    public static function add($expression, $function)
+    /**
+     * @param $httpMethod string HTTP method like POST, GET, ...
+     * @param $endpointPattern string Regex to match an incoming request
+     * @param $callback callable Function to execute when $method and $expression match
+     */
+    public static function add($httpMethod, $endpointPattern, $callback)
     {
-        array_push(self::$routes, Array(
-            'expression' => $expression,
-            'function' => $function
-        ));
+        $route = new Route($httpMethod, $endpointPattern, $callback);
+        array_push(self::$routes, $route);
     }
 
     public static function add404($function)
@@ -39,16 +42,11 @@ class Router
         $route_found = false;
 
         foreach (self::$routes as $route) {
-            //Add 'find string start' automatically
-            $route['expression'] = '^' . $route['expression'];
-
-            //Add 'find string end' automatically
-            $route['expression'] = $route['expression'] . '$';
-
             //check match
-            if (preg_match('#' . $route['expression'] . '#', self::$path, $matches)) {
+            $endpointMatches = preg_match($route->getEndpointPattern(), self::$path, $matches);
+            if ($endpointMatches && $route->getHttpMethod() === $_SERVER['REQUEST_METHOD']) {
                 array_shift($matches);//Always remove first element. This contains the whole string
-                call_user_func_array($route['function'], $matches);
+                call_user_func_array($route->getCallback(), $matches);
                 $route_found = true;
                 break;
             }
@@ -63,15 +61,15 @@ class Router
 
     private static function addDefaultRoutes()
     {
-        self::add('health', function () {
+        self::add('GET', 'health', function () {
             echo "HEALTHY";
         });
 
-        self::add('info', function () {
+        self::add('GET', 'info', function () {
             phpinfo();
         });
 
-        self::add('status', function () {
+        self::add('GET', 'status', function () {
             AppStatus::instance()->buildStatusPage();
         });
     }
