@@ -20,11 +20,10 @@ class RouterTest extends TestCase
 
     public function testAdd404Route()
     {
-        Router::add404(function () {
+        Router::setNotFound(function () {
             return "404";
         });
-        $actual = Router::$routes404;
-        $this->assertEquals(1, count($actual));
-        $this->assertEquals("404", call_user_func($actual[0]));
+        $actual = Router::$notFound;
+        $this->assertEquals("404", call_user_func($actual));
     }
 }

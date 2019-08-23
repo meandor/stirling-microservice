@@ -5,7 +5,11 @@ namespace Stirling\Core;
 class Router
 {
     public static $routes = Array();
-    public static $routes404 = Array();
+
+    /**
+     * @var Route
+     */
+    public static $notFound;
     public static $path;
 
     public static function init()
@@ -32,9 +36,9 @@ class Router
         array_push(self::$routes, $route);
     }
 
-    public static function add404($function)
+    public static function setNotFound($callback)
     {
-        array_push(self::$routes404, $function);
+        self::$notFound = $callback;
     }
 
     public static function run()
@@ -53,9 +57,7 @@ class Router
         }
 
         if (!$route_found) {
-            foreach (self::$routes404 as $route404) {
-                call_user_func_array($route404, Array(self::$path));
-            }
+            call_user_func_array(self::$notFound->getCallback(), Array(self::$path));
         }
     }
 
