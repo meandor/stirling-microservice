@@ -2,6 +2,8 @@
 
 namespace Stirling\Core;
 
+use InvalidArgumentException;
+
 class Router
 {
     public static $routes = Array();
@@ -69,19 +71,54 @@ class Router
         }
     }
 
+    public static function withAuthentication($username, $password, $callback)
+    {
+        return function () use ($username, $password, $callback) {
+            if ((!empty($username) && !empty($password)) && (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    $_SERVER['PHP_AUTH_USER'] != $username ||
+                    $_SERVER['PHP_AUTH_PW'] != $password)
+            ) {
+                header('WWW-Authenticate: Basic realm="Realm"');
+                header('HTTP/1.0 401 Unauthorized');
+                echo 'Not Authorized';
+                exit(0);
+            } else {
+                call_user_func($callback);
+            }
+        };
+    }
+
+    private static function getCredentials($config)
+    {
+        try {
+            $username = $config->maintenanceUser;
+            $password = $config->maintenancePassword;
+            return array("username" => $username, "password" => $password);
+        } catch (InvalidArgumentException $exception) {
+            error_log("No maintenance user or password set");
+            return array("username" => null, "password" => null);
+        }
+    }
+
     private static function addDefaultRoutes()
     {
         self::add('GET', 'health', function () {
             echo "HEALTHY";
         });
 
-        self::add('GET', 'info', function () {
-            phpinfo();
-        });
+        $config = Config::instance();
+        $maintenanceCredentials = self::getCredentials($config);
+        $username = $maintenanceCredentials["username"];
+        $password = $maintenanceCredentials["password"];
 
-        self::add('GET', 'status', function () {
+        self::add('GET', 'info', self::withAuthentication($username, $password, function () {
+            phpinfo();
+        }));
+
+        self::add('GET', 'status', self::withAuthentication($username, $password, function () {
             AppStatus::instance()->buildStatusPage();
-        });
+        }));
 
         self::setNotFound(function () {
             http_response_code(404);

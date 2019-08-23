@@ -75,7 +75,12 @@ method of Config if you want to use another config json file.
 
 ## Status
 Under `http://<location>/status` you can take a look at the app status. It aggregates
- registered status functions.
+registered status functions.
+
+**!important!** By default the complete config will be exposed in the status page.
+So it is generally advised to password protect the status page in production.
+To do so just add a `maintenanceUser` and `maintenancePassword` with corresponding values
+in the config json. This will add basic authentication to internal maintenance pages.
  
 To register a new status:
 ````php
