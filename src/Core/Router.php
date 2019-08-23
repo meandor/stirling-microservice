@@ -61,7 +61,7 @@ class Router
         });
 
         if (!empty($matchingEndpoints)) {
-            $route = $matchingEndpoints[0];
+            $route = array_values($matchingEndpoints)[0];
             preg_match($route->getEndpointPattern(), self::$path, $matches);
             array_shift($matches);
             header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
