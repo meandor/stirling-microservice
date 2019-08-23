@@ -43,20 +43,28 @@ class Router
 
     public static function run()
     {
-        $route_found = false;
-
-        foreach (self::$routes as $route) {
-            //check match
-            $endpointMatches = preg_match($route->getEndpointPattern(), self::$path, $matches);
-            if ($endpointMatches && $route->getHttpMethod() === $_SERVER['REQUEST_METHOD']) {
-                array_shift($matches);//Always remove first element. This contains the whole string
-                call_user_func_array($route->getCallback(), $matches);
-                $route_found = true;
-                break;
-            }
+        if ($_SERVER['REQUEST_METHOD'] === HttpMethods::OPTIONS) {
+            header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+            header('Access-Control-Allow-Credentials: true');
+            header("Access-Control-Allow-Methods: GET, PUT, POST, OPTIONS, DELETE");
+            header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+            header('Access-Control-Max-Age: 86400');
+            exit(0);
         }
 
-        if (!$route_found) {
+        $matchingEndpoints = array_filter(self::$routes, function ($route) {
+            $endpointMatches = preg_match($route->getEndpointPattern(), self::$path, $matches);
+            $httpMethodMatches = $route->getHttpMethod() === $_SERVER['REQUEST_METHOD'];
+            return $endpointMatches && $httpMethodMatches;
+        });
+
+        if (!empty($matchingEndpoints)) {
+            $route = $matchingEndpoints[0];
+            preg_match($route->getEndpointPattern(), self::$path, $matches);
+            array_shift($matches);
+            header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+            call_user_func_array($route->getCallback(), $matches);
+        } else {
             call_user_func_array(self::$notFound->getCallback(), Array(self::$path));
         }
     }
