@@ -40,7 +40,7 @@ class Router
 
     public static function setNotFound($callback)
     {
-        self::$notFound = $callback;
+        self::$notFound = new Route("", "", $callback);
     }
 
     public static function run()
