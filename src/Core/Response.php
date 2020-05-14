@@ -2,6 +2,8 @@
 
 namespace Stirling\Core;
 
+use RuntimeException;
+
 class Response
 {
     /**
@@ -10,19 +12,19 @@ class Response
     private $code;
 
     /**
-     * @var mixed body
+     * @var mixed entity
      */
-    private $body;
+    private $entity;
 
     /**
      * Response constructor.
      * @param int $code
-     * @param mixed $body
+     * @param mixed $entity
      */
-    public function __construct(int $code, $body)
+    public function __construct(int $code, $entity)
     {
         $this->code = $code;
-        $this->body = $body;
+        $this->entity = $entity;
     }
 
     /**
@@ -34,10 +36,26 @@ class Response
     }
 
     /**
-     * @return false|string
+     * @return string
      */
     public function getBody()
     {
-        return json_encode($this->body, JSON_NUMERIC_CHECK | JSON_PRETTY_PRINT);
+        if (is_null($this->entity)) {
+            return "";
+        }
+
+        $json = json_encode($this->entity, JSON_NUMERIC_CHECK | JSON_PRETTY_PRINT);
+        if ($json === false) {
+            throw new RuntimeException("Failed serializing json for: " . $this->entity);
+        }
+        return $json;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEntity()
+    {
+        return $this->entity;
     }
 }
