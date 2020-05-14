@@ -47,7 +47,7 @@ class ConfigTest extends TestCase
     public function testGetExistentPropertyValue()
     {
         file_put_contents(self::CONFIG_JSON, "{\"foo\":\"bar\"}");
-        var_dump(file_get_contents(self::CONFIG_JSON));
+
         $actual = TestingConfig::instance(self::CONFIG_JSON);
         $this->assertEquals("bar", $actual->foo);
     }
