@@ -1,9 +1,9 @@
 <?php
+
 namespace Stirling\Core;
 
 use Exception;
-use InvalidArgumentException;
-use \PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class TestingConfig extends Config
 {
@@ -18,7 +18,7 @@ class ConfigTest extends TestCase
 
     const CONFIG_JSON = __DIR__ . "/../resources/default.json";
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         parent::tearDown();
         TestingConfig::destroy();
@@ -30,7 +30,6 @@ class ConfigTest extends TestCase
         }
     }
 
-
     public function testCreateConfigSingleton()
     {
         $expected = TestingConfig::instance(self::CONFIG_JSON);
@@ -38,14 +37,11 @@ class ConfigTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testNotExistentConfigProperty()
     {
+        $this->expectExceptionMessage("Property 'foobar' does not exist");
         $actual = TestingConfig::instance(self::CONFIG_JSON);
         $actual->foobar;
-        $this->expectExceptionMessage("Property 'foobar' does not exist");
     }
 
     public function testGetExistentPropertyValue()
@@ -56,25 +52,19 @@ class ConfigTest extends TestCase
         $this->assertEquals("bar", $actual->foo);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testGetMissingPropertyValueFromCorrectFile()
     {
+        $this->expectExceptionMessage("Property 'foobar' does not exist");
         file_put_contents(self::CONFIG_JSON, "{\"foo\":\"bar\"}");
         $actual = TestingConfig::instance(self::CONFIG_JSON);
         $actual->foobar;
-        $this->expectExceptionMessage("Property 'foobar' does not exist");
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testMalformedJson()
     {
+        $this->expectExceptionMessage("Property 'foo' does not exist");
         file_put_contents(self::CONFIG_JSON, "{foo\":\"bar\"}");
         $actual = TestingConfig::instance(self::CONFIG_JSON);
         $actual->foo;
-        $this->expectExceptionMessage("Property 'foo' does not exist");
     }
 }

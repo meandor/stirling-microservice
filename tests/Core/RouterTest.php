@@ -24,6 +24,6 @@ class RouterTest extends TestCase
             return "404";
         });
         $actual = Router::$notFound;
-        $this->assertEquals("404", call_user_func($actual));
+        $this->assertEquals("404", call_user_func($actual->getCallback()));
     }
 }
