@@ -10,16 +10,16 @@ class Response
     private $code;
 
     /**
-     * @var array body
+     * @var mixed body
      */
     private $body;
 
     /**
      * Response constructor.
      * @param int $code
-     * @param array $body
+     * @param mixed $body
      */
-    public function __construct(int $code, array $body)
+    public function __construct(int $code, $body)
     {
         $this->code = $code;
         $this->body = $body;
