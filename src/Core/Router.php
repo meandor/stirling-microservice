@@ -65,6 +65,7 @@ class Router
             preg_match($route->getEndpointPattern(), self::$path, $matches);
             array_shift($matches);
             header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+            header('Access-Control-Allow-Credentials: true');
             call_user_func_array($route->getCallback(), $matches);
         } else {
             call_user_func_array(self::$notFound->getCallback(), Array(self::$path));
