@@ -1,6 +1,6 @@
 language: php
 php:
-  - '7.3'
+  - '8.1'
 
 sudo: false
 
