@@ -6,7 +6,7 @@ use InvalidArgumentException;
 
 class Router
 {
-    public static $routes = Array();
+    public static $routes = array();
 
     /**
      * @var Route
@@ -16,12 +16,12 @@ class Router
 
     public static function init()
     {
-        $parsed_url = parse_url($_SERVER['REQUEST_URI']);
+        $parsed_url = parse_url($_SERVER["REQUEST_URI"]);
 
-        if (isset($parsed_url['path'])) {
-            self::$path = trim($parsed_url['path'], '/');
+        if (isset($parsed_url["path"])) {
+            self::$path = trim($parsed_url["path"], "/");
         } else {
-            self::$path = '';
+            self::$path = "";
         }
 
         self::addDefaultRoutes();
@@ -45,21 +45,21 @@ class Router
 
     public static function run()
     {
-        if (isset($_SERVER['HTTP_ORIGIN'])) {
-            header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-            header('Access-Control-Allow-Credentials: true');
-            header('Access-Control-Max-Age: 86400');
+        if (isset($_SERVER["HTTP_REFERER"])) {
+            header("Access-Control-Allow-Origin: {$_SERVER["HTTP_REFERER"]}");
+            header("Access-Control-Allow-Credentials: true");
+            header("Access-Control-Max-Age: 86400");
         }
 
-        if ($_SERVER['REQUEST_METHOD'] === HttpMethods::OPTIONS) {
+        if ($_SERVER["REQUEST_METHOD"] === HttpMethods::OPTIONS) {
             header("Access-Control-Allow-Methods: GET, PUT, POST, OPTIONS, DELETE");
-            header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+            header("Access-Control-Allow-Headers: {$_SERVER["HTTP_ACCESS_CONTROL_REQUEST_HEADERS"]}");
             exit(0);
         }
 
         $matchingEndpoints = array_filter(self::$routes, function ($route) {
             $endpointMatches = preg_match($route->getEndpointPattern(), self::$path, $matches);
-            $httpMethodMatches = $route->getHttpMethod() === $_SERVER['REQUEST_METHOD'];
+            $httpMethodMatches = $route->getHttpMethod() === $_SERVER["REQUEST_METHOD"];
             return $endpointMatches && $httpMethodMatches;
         });
 
@@ -77,13 +77,13 @@ class Router
     {
         return function () use ($username, $password, $callback) {
             if ((!empty($username) && !empty($password)) && (
-                    !isset($_SERVER['PHP_AUTH_USER']) ||
-                    $_SERVER['PHP_AUTH_USER'] != $username ||
-                    $_SERVER['PHP_AUTH_PW'] != $password)
+                    !isset($_SERVER["PHP_AUTH_USER"]) ||
+                    $_SERVER["PHP_AUTH_USER"] != $username ||
+                    $_SERVER["PHP_AUTH_PW"] != $password)
             ) {
                 header('WWW-Authenticate: Basic realm="Realm"');
-                header('HTTP/1.0 401 Unauthorized');
-                echo 'Not Authorized';
+                header("HTTP/1.0 401 Unauthorized");
+                echo "Not Authorized";
                 exit(0);
             } else {
                 call_user_func($callback);
@@ -105,7 +105,7 @@ class Router
 
     private static function addDefaultRoutes()
     {
-        self::add('GET', 'health', function () {
+        self::add("GET", "health", function () {
             echo "HEALTHY";
         });
 
@@ -114,11 +114,11 @@ class Router
         $username = $maintenanceCredentials["username"];
         $password = $maintenanceCredentials["password"];
 
-        self::add('GET', 'info', self::withAuthentication($username, $password, function () {
+        self::add("GET", "info", self::withAuthentication($username, $password, function () {
             phpinfo();
         }));
 
-        self::add('GET', 'status', self::withAuthentication($username, $password, function () {
+        self::add("GET", "status", self::withAuthentication($username, $password, function () {
             AppStatus::instance()->buildStatusPage();
         }));
 
