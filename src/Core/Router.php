@@ -45,11 +45,9 @@ class Router
 
     public static function run()
     {
-        if (isset($_SERVER["HTTP_REFERER"])) {
-            header("Access-Control-Allow-Origin: {$_SERVER["HTTP_REFERER"]}");
-            header("Access-Control-Allow-Credentials: true");
-            header("Access-Control-Max-Age: 86400");
-        }
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Credentials: true");
+        header("Access-Control-Max-Age: 86400");
 
         if ($_SERVER["REQUEST_METHOD"] === HttpMethods::OPTIONS) {
             header("Access-Control-Allow-Methods: GET, PUT, POST, OPTIONS, DELETE");
@@ -69,7 +67,7 @@ class Router
             array_shift($matches);
             call_user_func_array($route->getCallback(), $matches);
         } else {
-            call_user_func_array(self::$notFound->getCallback(), Array(self::$path));
+            call_user_func_array(self::$notFound->getCallback(), array(self::$path));
         }
     }
 
