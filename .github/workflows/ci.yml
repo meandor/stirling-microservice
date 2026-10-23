@@ -20,7 +20,8 @@ jobs:
         with:
           php_version: ${{ matrix.php }}
           php_extensions: json
-          args: install --no-interaction --no-progress
+          command: install
+          dev: yes
 
       - name: Run tests
         run: ./bin/go test
@@ -35,15 +36,11 @@ jobs:
         with:
           php_version: '8.4'
           php_extensions: json
-          args: install --no-interaction --no-progress
+          command: install
+          dev: yes
 
       - name: PHPStan
-        uses: php-actions/phpstan@v1
-        with:
-          php_version: '8.4'
-          level: 4
-          path: src
-          args: --no-progress
+        run: ./bin/go static-analysis
 
   lint:
     runs-on: ubuntu-latest
@@ -55,7 +52,8 @@ jobs:
         with:
           php_version: '8.4'
           php_extensions: json
-          args: install --no-interaction --no-progress
+          command: install
+          dev: yes
 
       - name: Check code style
         run: ./bin/go lint-check
