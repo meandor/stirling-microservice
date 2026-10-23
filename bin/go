@@ -21,7 +21,7 @@ goal_check() {
 }
 
 goal_static_analysis() {
-  ${SCRIPT_DIR}/../vendor/bin/phpstan analyse --no-progress
+  ${SCRIPT_DIR}/../vendor/bin/phpstan analyse --no-progress --configuration ${SCRIPT_DIR}/../phpstan.neon.dist
 }
 
 goal_security_check() {
