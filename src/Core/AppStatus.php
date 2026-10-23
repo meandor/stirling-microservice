@@ -1,4 +1,5 @@
 <?php
+
 namespace Stirling\Core;
 
 /**
@@ -21,7 +22,7 @@ class AppStatus
      */
     private function __construct()
     {
-        $this->statusCollection = Array();
+        $this->statusCollection = [];
     }
 
     public static function instance()
@@ -34,7 +35,7 @@ class AppStatus
 
     public function registerStatus($name, $description, $function)
     {
-        $status = array("name" => $name, "description" => $description, "function" => $function);
+        $status = ["name" => $name, "description" => $description, "function" => $function];
         array_push($this->statusCollection, $status);
     }
 
@@ -47,20 +48,20 @@ class AppStatus
     public function getStatusArray()
     {
         $config = Config::instance();
-        $status = array(
-            "application" => array(
+        $status = [
+            "application" => [
                 "name" => $config->name,
-                "version" => $config->version),
+                "version" => $config->version],
             "git" => $config->git,
             "configuration" => $config->getConfigMap(),
             "status" => $this->getStatusOverview(),
-            "statusDetails" => $this->aggregateStatusDetails());
+            "statusDetails" => $this->aggregateStatusDetails()];
         return $status;
     }
 
     public function aggregateStatusDetails()
     {
-        $result = array();
+        $result = [];
         foreach ($this->statusCollection as $status) {
             $statusCopy = $status;
             $statusCopy["status"] = call_user_func($statusCopy["function"]) ? "ok" : "error";

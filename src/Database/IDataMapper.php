@@ -1,4 +1,5 @@
 <?php
+
 namespace Stirling\Database;
 
 /**
@@ -15,5 +16,5 @@ interface IDataMapper
      * @param $dbData array raw data from the database
      * @return IEntity
      */
-    function createEntity(array $dbData): IEntity;
+    public function createEntity(array $dbData): IEntity;
 }

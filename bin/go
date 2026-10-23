@@ -5,20 +5,58 @@ goal_test() {
   ${SCRIPT_DIR}/../vendor/bin/phpunit --colors=always ${SCRIPT_DIR}/../tests
 }
 
+goal_lint_check() {
+  ${SCRIPT_DIR}/../vendor/bin/php-cs-fixer check
+}
+
+goal_lint_fix() {
+  ${SCRIPT_DIR}/../vendor/bin/php-cs-fixer fix
+}
+
+goal_check() {
+  goal_lint_check
+  goal_static_analysis
+  goal_security_check
+  goal_test
+}
+
+goal_static_analysis() {
+  ${SCRIPT_DIR}/../vendor/bin/phpstan analyse --no-progress
+}
+
+goal_security_check() {
+  docker run --rm --volume "$(pwd):/app" --volume /var-run/docker.sock:/var-run/docker.sock aquasec/trivy:latest fs --scanners vuln,secret,misconfig --include-dev-deps --no-progress /app/composer.lock
+}
+
 function help {
     echo "usage: $0 <task>
 task can be:
     help             -- This help message
     install          -- Installs all dependencies
     test             -- Runs all tests
+    security-check   -- Scans code and dependencies (via Docker)
+    lint-check       -- Checks code style (no changes)
+    lint             -- Fixes code style (auto-fix)
+    static-analysis  -- Statically checks the code with PHPStan (level 4)
+    check            -- Runs lint-check, static-analysis, security-check and unit tests
                      -- Anything else accepted by composer
-    "
+         "
 }
 
 if [ "$1" == "help" ]; then
     help
 elif [ "$1" == "test" ]; then
     goal_test
+elif [ "$1" == "security-check" ]; then
+    goal_security_check
+elif [ "$1" == "static-analysis" ]; then
+    goal_static_analysis
+elif [ "$1" == "lint-check" ]; then
+    goal_lint_check
+elif [ "$1" == "lint" ]; then
+    goal_lint_fix
+elif [ "$1" == "check" ]; then
+    goal_check
 else
     php ${SCRIPT_DIR}/composer.phar $*
 fi

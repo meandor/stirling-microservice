@@ -3,3 +3,12 @@
 /vendor/
 composer.lock
 /tests/resources/*.json
+
+# PHP CS Fixer configuration
+/.php-cs-fixer.cache
+/.php-cs-fixer.php
+
+# PHPStan configuration
+/.php-cs-fixer.dist.php
+/.phpstan.cache
+/phpstan.neon.dist

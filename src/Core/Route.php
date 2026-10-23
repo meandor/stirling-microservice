@@ -19,7 +19,8 @@ class Route
     public function __construct($httpMethod, $endpointPattern, $callback)
     {
         $this->httpMethod = $httpMethod;
-        $this->endpointPattern = '#^' . $endpointPattern . '$#';;
+        $this->endpointPattern = '#^' . $endpointPattern . '$#';
+        ;
         $this->callback = $callback;
     }
 

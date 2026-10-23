@@ -4,9 +4,9 @@ namespace Stirling\Core;
 
 abstract class HttpMethods
 {
-    const GET = 'GET';
-    const PUT = 'PUT';
-    const POST = 'POST';
-    const DELETE = 'DELETE';
-    const OPTIONS = 'OPTIONS';
+    public const GET = 'GET';
+    public const PUT = 'PUT';
+    public const POST = 'POST';
+    public const DELETE = 'DELETE';
+    public const OPTIONS = 'OPTIONS';
 }

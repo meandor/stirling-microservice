@@ -2,14 +2,13 @@
 
 namespace Stirling\Core;
 
-
 use PHPUnit\Framework\TestCase;
 
 class ResponseTest extends TestCase
 {
     public function testShouldGetJsonEncodedEntity()
     {
-        $response = new Response(200, array("message" => "foo"));
+        $response = new Response(200, ["message" => "foo"]);
 
         $actual = $response->getBody();
         $expected = "{\n    \"message\": \"foo\"\n}";
@@ -19,7 +18,7 @@ class ResponseTest extends TestCase
 
     public function testShouldGetRawEntity()
     {
-        $entity = array("message" => "foo");
+        $entity = ["message" => "foo"];
         $response = new Response(200, $entity);
 
         $actual = $response->getEntity();

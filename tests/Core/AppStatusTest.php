@@ -1,13 +1,14 @@
 <?php
+
 namespace Stirling\Core;
 
-use \PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class AppStatusTest extends TestCase
 {
-    const okStatus = array("name" => "foobar", "description" => "foobar message", "status" => "ok");
+    public const okStatus = ["name" => "foobar", "description" => "foobar message", "status" => "ok"];
 
-    const errorStatus = array("name" => "foobar2", "description" => "error message", "status" => "error");
+    public const errorStatus = ["name" => "foobar2", "description" => "error message", "status" => "error"];
 
     public function testSingletonAppStatus()
     {
@@ -20,20 +21,20 @@ class AppStatusTest extends TestCase
     public function testAggregateEmptyStatus()
     {
         $actual = AppStatus::instance();
-        $this->assertEquals(array(), $actual->aggregateStatusDetails());
+        $this->assertEquals([], $actual->aggregateStatusDetails());
     }
 
     public function testEmptyStatusArray()
     {
         $actual = AppStatus::instance()->getStatusArray();
-        $expected = array(
-            "application" => array(
+        $expected = [
+            "application" => [
                 "name" => "foobar",
-                "version" => "1.3.3.7"),
+                "version" => "1.3.3.7"],
             "git" => null,
-            "configuration" => array("config1" => "value"),
+            "configuration" => ["config1" => "value"],
             "status" => "ok",
-            "statusDetails" => array());
+            "statusDetails" => []];
         $this->assertEquals($expected, $actual);
     }
 
@@ -56,14 +57,14 @@ class AppStatusTest extends TestCase
     public function testOneItemInStatusArray()
     {
         $actual = AppStatus::instance()->getStatusArray();
-        $expected = array(
-            "application" => array(
+        $expected = [
+            "application" => [
                 "name" => "foobar",
-                "version" => "1.3.3.7"),
+                "version" => "1.3.3.7"],
             "git" => null,
-            "configuration" => array("config1" => "value"),
+            "configuration" => ["config1" => "value"],
             "status" => "ok",
-            "statusDetails" => array(0 => self::okStatus));
+            "statusDetails" => [0 => self::okStatus]];
         $this->assertEquals($expected, $actual);
     }
 
@@ -87,14 +88,14 @@ class AppStatusTest extends TestCase
     public function testStatusArray()
     {
         $actual = AppStatus::instance()->getStatusArray();
-        $expected = array(
-            "application" => array(
+        $expected = [
+            "application" => [
                 "name" => "foobar",
-                "version" => "1.3.3.7"),
+                "version" => "1.3.3.7"],
             "git" => null,
-            "configuration" => array("config1" => "value"),
+            "configuration" => ["config1" => "value"],
             "status" => "error",
-            "statusDetails" => array(0 => self::okStatus, 1 => self::errorStatus));
+            "statusDetails" => [0 => self::okStatus, 1 => self::errorStatus]];
         $this->assertEquals($expected, $actual);
     }
 }

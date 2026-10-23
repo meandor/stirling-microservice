@@ -6,7 +6,7 @@ use InvalidArgumentException;
 
 class Router
 {
-    public static $routes = array();
+    public static $routes = [];
 
     /**
      * @var Route
@@ -67,7 +67,7 @@ class Router
             array_shift($matches);
             call_user_func_array($route->getCallback(), $matches);
         } else {
-            call_user_func_array(self::$notFound->getCallback(), array(self::$path));
+            call_user_func_array(self::$notFound->getCallback(), [self::$path]);
         }
     }
 
@@ -75,9 +75,10 @@ class Router
     {
         return function () use ($username, $password, $callback) {
             if ((!empty($username) && !empty($password)) && (
-                    !isset($_SERVER["PHP_AUTH_USER"]) ||
-                    $_SERVER["PHP_AUTH_USER"] != $username ||
-                    $_SERVER["PHP_AUTH_PW"] != $password)
+                !isset($_SERVER["PHP_AUTH_USER"])
+                    || $_SERVER["PHP_AUTH_USER"] != $username
+                    || $_SERVER["PHP_AUTH_PW"] != $password
+            )
             ) {
                 header('WWW-Authenticate: Basic realm="Realm"');
                 header("HTTP/1.0 401 Unauthorized");
@@ -94,10 +95,10 @@ class Router
         try {
             $username = $config->maintenanceUser;
             $password = $config->maintenancePassword;
-            return array("username" => $username, "password" => $password);
-        } catch (InvalidArgumentException $exception) {
+            return ["username" => $username, "password" => $password];
+        } catch (\Exception $exception) { // Property access goes through __get(), which PHPStan cannot analyse. @phpstan-ignore catch.neverThrown
             error_log("No maintenance user or password set");
-            return array("username" => null, "password" => null);
+            return ["username" => null, "password" => null];
         }
     }
 

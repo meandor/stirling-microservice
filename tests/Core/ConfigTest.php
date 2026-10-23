@@ -15,19 +15,14 @@ class TestingConfig extends Config
 
 class ConfigTest extends TestCase
 {
-
-    const CONFIG_JSON = __DIR__ . "/../resources/default.json";
+    public const CONFIG_JSON = __DIR__ . "/../resources/default.json";
 
     protected function tearDown(): void
     {
         parent::tearDown();
         TestingConfig::destroy();
 
-        try {
-            unlink(self::CONFIG_JSON);
-        } catch (Exception $e) {
-
-        }
+        file_put_contents(self::CONFIG_JSON, "{}");
     }
 
     public function testCreateConfigSingleton()

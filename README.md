@@ -6,7 +6,7 @@
 [![Monthly Downloads](https://poser.pugx.org/meandor/stirling-microservice/d/monthly)](https://packagist.org/packages/meandor/stirling-microservice)
 [![Daily Downloads](https://poser.pugx.org/meandor/stirling-microservice/d/daily)](https://packagist.org/packages/meandor/stirling-microservice)
 [![composer.lock](https://poser.pugx.org/meandor/stirling-microservice/composerlock)](https://packagist.org/packages/meandor/stirling-microservice)
-[![Build Status](https://travis-ci.org/meandor/stirling-microservice.svg?branch=master)](https://travis-ci.org/meandor/stirling-microservice)
+[![CI](https://github.com/meandor/stirling-microservice/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/meandor/stirling-microservice/actions/workflows/ci.yml)
 
 A PHP microservice named after the super famous inventor of the stirling engine.
 
@@ -26,6 +26,37 @@ To see a list of arguments:
 To execute all tests:
 ````bash
 ./bin/go test
+````
+
+To scan the code and its dependencies for vulnerabilities, secrets and
+misconfigurations with [Trivy](https://trivy.dev/) (runs inside Docker,
+no binary to install — the image is pulled automatically on first run):
+````bash
+./bin/go security-check
+````
+
+This scans `composer.lock` (including dev dependencies) for known
+vulnerabilities. It is a dependency scan, not a scan of your PHP source
+code.
+
+To check the code style with PHP CS Fixer (validates, does not change files):
+````bash
+./bin/go lint-check
+````
+
+To auto-fix the code style with PHP CS Fixer:
+````bash
+./bin/go lint
+````
+
+To statically analyse the code with PHPStan (level 4, checks `src/`):
+````bash
+./bin/go static-analysis
+````
+
+To run lint-check, static-analysis, security-check and the unit tests all at once:
+````bash
+./bin/go check
 ````
 
 ## Usage

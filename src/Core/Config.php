@@ -1,11 +1,11 @@
 <?php
+
 namespace Stirling\Core;
 
 use InvalidArgumentException;
 
 class Config
 {
-
     protected static $instance;
 
     private $properties;
@@ -16,7 +16,7 @@ class Config
      */
     private function __construct($configPath)
     {
-        $this->properties = Array("git" => null, "name" => null, "version" => null);
+        $this->properties = ["git" => null, "name" => null, "version" => null];
         if (file_exists($configPath)) {
             $json = json_decode(file_get_contents($configPath), true);
             if ($json != null) {
