@@ -12,6 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.4', '8.5']
+    env:
+      GITHUB_TOKEN: ""
     steps:
       - uses: actions/checkout@v4
 
@@ -22,8 +24,6 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        env:
-          GITHUB_TOKEN: ""
         run: ./bin/go install
 
       - name: Run tests
@@ -31,6 +31,8 @@ jobs:
 
   static-analysis:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ""
     steps:
       - uses: actions/checkout@v4
 
@@ -41,8 +43,6 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        env:
-          GITHUB_TOKEN: ""
         run: ./bin/go install
 
       - name: PHPStan
@@ -50,6 +50,8 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ""
     steps:
       - uses: actions/checkout@v4
 
@@ -60,8 +62,6 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        env:
-          GITHUB_TOKEN: ""
         run: ./bin/go install
 
       - name: Check code style
