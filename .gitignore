@@ -1,7 +1,6 @@
 *.iml
 .idea
 /vendor/
-composer.lock
 /tests/resources/*.json
 
 # PHP CS Fixer configuration

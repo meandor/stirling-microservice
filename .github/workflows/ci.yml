@@ -15,14 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: json
-          coverage: none
-
       - name: Install dependencies
-        run: ./bin/go install
+        uses: php-actions/composer@v6
+        with:
+          php_version: ${{ matrix.php }}
+          php_extensions: json
+          args: install --no-interaction --no-progress
 
       - name: Run tests
         run: ./bin/go test
@@ -32,31 +30,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          extensions: json
-          coverage: none
-
       - name: Install dependencies
-        run: ./bin/go install
+        uses: php-actions/composer@v6
+        with:
+          php_version: '8.4'
+          php_extensions: json
+          args: install --no-interaction --no-progress
 
       - name: PHPStan
-        run: ./bin/go static-analysis
+        uses: php-actions/phpstan@v1
+        with:
+          php_version: '8.4'
+          level: 4
+          path: src
+          args: --no-progress
 
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          extensions: json
-          coverage: none
-
       - name: Install dependencies
-        run: ./bin/go install
+        uses: php-actions/composer@v6
+        with:
+          php_version: '8.4'
+          php_extensions: json
+          args: install --no-interaction --no-progress
 
       - name: Check code style
         run: ./bin/go lint-check
