@@ -15,13 +15,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        uses: php-actions/composer@v6
+      - uses: shivammathur/setup-php@v2
         with:
-          php_version: ${{ matrix.php }}
-          php_extensions: json
-          command: install
-          dev: yes
+          php-version: ${{ matrix.php }}
+          extensions: json
+          coverage: none
+
+      - name: Install dependencies
+        env:
+          GITHUB_TOKEN: ""
+        run: ./bin/go install
 
       - name: Run tests
         run: ./bin/go test
@@ -31,13 +34,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        uses: php-actions/composer@v6
+      - uses: shivammathur/setup-php@v2
         with:
-          php_version: '8.4'
-          php_extensions: json
-          command: install
-          dev: yes
+          php-version: '8.4'
+          extensions: json
+          coverage: none
+
+      - name: Install dependencies
+        env:
+          GITHUB_TOKEN: ""
+        run: ./bin/go install
 
       - name: PHPStan
         run: ./bin/go static-analysis
@@ -47,13 +53,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        uses: php-actions/composer@v6
+      - uses: shivammathur/setup-php@v2
         with:
-          php_version: '8.4'
-          php_extensions: json
-          command: install
-          dev: yes
+          php-version: '8.4'
+          extensions: json
+          coverage: none
+
+      - name: Install dependencies
+        env:
+          GITHUB_TOKEN: ""
+        run: ./bin/go install
 
       - name: Check code style
         run: ./bin/go lint-check
