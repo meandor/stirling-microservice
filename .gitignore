@@ -10,4 +10,3 @@
 # PHPStan configuration
 /.php-cs-fixer.dist.php
 /.phpstan.cache
-/phpstan.neon.dist
