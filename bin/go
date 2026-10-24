@@ -1,31 +1,48 @@
 #!/usr/bin/env bash
-SCRIPT_DIR=$(dirname $0)
+# Find project root
+PROJECT_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
 goal_test() {
-  ${SCRIPT_DIR}/../vendor/bin/phpunit --colors=always ${SCRIPT_DIR}/../tests
+  ${PROJECT_ROOT}/vendor/bin/phpunit --colors=always ${PROJECT_ROOT}/tests
 }
 
-goal_mutation_test() {
-  ${SCRIPT_DIR}/../vendor/bin/infection --no-interaction --threads=1
+goal_complexity() {
+  ${PROJECT_ROOT}/vendor/bin/phpmd analyze --format github --ruleset ${PROJECT_ROOT}/phpmd-complexity.xml src
+}
+
+goal_mutation() {
+  ${PROJECT_ROOT}/vendor/bin/infection --no-interaction --threads=1
+}
+
+goal_mutation_check() {
+  ${PROJECT_ROOT}/vendor/bin/infection --no-interaction --threads=1 --min-msi=60
 }
 
 goal_lint_check() {
-  ${SCRIPT_DIR}/../vendor/bin/php-cs-fixer check
+  ${PROJECT_ROOT}/vendor/bin/php-cs-fixer check
 }
 
 goal_lint_fix() {
-  ${SCRIPT_DIR}/../vendor/bin/php-cs-fixer fix
+  ${PROJECT_ROOT}/vendor/bin/php-cs-fixer fix
 }
 
 goal_check() {
+  echo "Running lint-check..."
   goal_lint_check || return $?
+  echo "Running static-analysis..."
   goal_static_analysis || return $?
-  goal_security_check || return $?
+  echo "Running test..."
   goal_test || return $?
+  echo "Running mutation-check..."
+  goal_mutation_check || return $?
+  echo "Running complexity..."
+  goal_complexity || return $?
+  echo "Running security-check..."
+  goal_security_check || return $?
 }
 
 goal_static_analysis() {
-  ${SCRIPT_DIR}/../vendor/bin/phpstan analyse --no-progress --configuration ${SCRIPT_DIR}/../phpstan.neon.dist
+  ${PROJECT_ROOT}/vendor/bin/phpstan analyse --no-progress --configuration ${PROJECT_ROOT}/phpstan.neon.dist
 }
 
 goal_security_check() {
@@ -38,7 +55,9 @@ task can be:
     help             -- This help message
     install          -- Installs all dependencies
     test             -- Runs all tests
+    complexity         -- Checks cyclomatic complexity
     mutation         -- Runs mutation tests with Infection (xdebug for coverage)
+    mutation-check    -- Runs mutation tests with 60% MSI threshold
     security-check   -- Scans code and dependencies (via Docker)
     lint-check       -- Checks code style (no changes)
     lint             -- Fixes code style (auto-fix)
@@ -52,8 +71,12 @@ if [ "$1" == "help" ]; then
     help
 elif [ "$1" == "test" ]; then
     goal_test
+elif [ "$1" == "complexity" ]; then
+    goal_complexity
 elif [ "$1" == "mutation" ]; then
-    goal_mutation_test
+    goal_mutation
+elif [ "$1" == "mutation-check" ]; then
+    goal_mutation_check
 elif [ "$1" == "security-check" ]; then
     goal_security_check
 elif [ "$1" == "static-analysis" ]; then
@@ -65,5 +88,5 @@ elif [ "$1" == "lint" ]; then
 elif [ "$1" == "check" ]; then
     goal_check
 else
-    php ${SCRIPT_DIR}/composer.phar $*
+    php ${PROJECT_ROOT}/bin/composer.phar $*
 fi

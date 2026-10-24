@@ -48,6 +48,25 @@ jobs:
       - name: PHPStan
         run: ./bin/go static-analysis
 
+  complexity:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: json
+          coverage: none
+
+      - name: Install dependencies
+        run: ./bin/go install
+
+      - name: PHPMD Cyclomatic Complexity
+        run: ./bin/go complexity
+
   lint:
     runs-on: ubuntu-latest
     env:
@@ -85,7 +104,7 @@ jobs:
         run: ./bin/go install
 
       - name: Run Mutation Testing
-        run: ./bin/go mutation
+        run: ./bin/go mutation-check
 
   security:
     runs-on: ubuntu-latest

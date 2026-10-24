@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<ruleset name="Cyclomatic Complexity">
+    <rule ref="rulesets/codesize.xml/CyclomaticComplexity">
+        <properties>
+            <property name="reportLevel" value="6"/>
+        </properties>
+    </rule>
+</ruleset>
