@@ -67,6 +67,26 @@ jobs:
       - name: Check code style
         run: ./bin/go lint-check
 
+  mutation-testing:
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: json,xdebug
+          coverage: xdebug
+
+      - name: Install dependencies
+        run: ./bin/go install
+
+      - name: Run Mutation Testing
+        run: ./bin/go mutation
+
   security:
     runs-on: ubuntu-latest
     steps:
