@@ -33,6 +33,11 @@ class AppStatus
         return self::$appStatus;
     }
 
+    public function reset()
+    {
+        $this->statusCollection = [];
+    }
+
     public function registerStatus($name, $description, $function)
     {
         $status = ["name" => $name, "description" => $description, "function" => $function];

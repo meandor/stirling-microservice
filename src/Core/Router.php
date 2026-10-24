@@ -97,7 +97,6 @@ class Router
             $password = $config->maintenancePassword;
             return ["username" => $username, "password" => $password];
         } catch (\Exception $exception) { // Property access goes through __get(), which PHPStan cannot analyse. @phpstan-ignore catch.neverThrown
-            error_log("No maintenance user or password set");
             return ["username" => null, "password" => null];
         }
     }

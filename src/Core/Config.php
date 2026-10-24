@@ -50,4 +50,9 @@ class Config
         unset($temp["git"]);
         return $temp;
     }
+
+    public static function destroy(): void
+    {
+        self::$instance = null;
+    }
 }

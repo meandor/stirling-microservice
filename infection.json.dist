@@ -1,0 +1,13 @@
+{
+    "$schema": "vendor/infection/infection/resources/schema.json",
+    "timeout": 60,
+    "source": {
+        "directories": [
+            "src"
+        ]
+    },
+    "minMsi": 60,
+    "minCoveredMsi": 60,
+    "testFramework": "phpunit",
+    "initialTestsPhpOptions": "-d xdebug.mode=coverage"
+}

@@ -10,6 +10,14 @@ class AppStatusTest extends TestCase
 
     public const errorStatus = ["name" => "foobar2", "description" => "error message", "status" => "error"];
 
+    protected function setUp(): void
+    {
+        file_put_contents(__DIR__ . "/../resources/default.json", "{\"name\":\"foobar\",\"version\":\"1.3.3.7\",\"config1\":\"value\"}");
+        Config::destroy();
+        TestingConfig::instance(__DIR__ . "/../resources/default.json");
+        AppStatus::instance()->reset();
+    }
+
     public function testSingletonAppStatus()
     {
         file_put_contents(__DIR__ . "/../resources/default.json", "{\"name\":\"foobar\",\"version\":\"1.3.3.7\",\"config1\":\"value\"}");
@@ -51,12 +59,20 @@ class AppStatusTest extends TestCase
 
     public function testStatusOverview()
     {
-        $this->assertEquals("ok", AppStatus::instance()->getStatusOverview());
+        $status = AppStatus::instance();
+        $status->registerStatus("foobar", "foobar message", function () {
+            return true;
+        });
+        $this->assertEquals("ok", $status->getStatusOverview());
     }
 
     public function testOneItemInStatusArray()
     {
-        $actual = AppStatus::instance()->getStatusArray();
+        $status = AppStatus::instance();
+        $status->registerStatus("foobar", "foobar message", function () {
+            return true;
+        });
+        $actual = $status->getStatusArray();
         $expected = [
             "application" => [
                 "name" => "foobar",
@@ -71,6 +87,9 @@ class AppStatusTest extends TestCase
     public function testRegisteringErrorStatus()
     {
         $status = AppStatus::instance();
+        $status->registerStatus("foobar", "foobar message", function () {
+            return true;
+        });
         $status->registerStatus("foobar2", "error message", function () {
             return false;
         });
@@ -82,12 +101,26 @@ class AppStatusTest extends TestCase
 
     public function testStatusErrorOverview()
     {
-        $this->assertEquals("error", AppStatus::instance()->getStatusOverview());
+        $status = AppStatus::instance();
+        $status->registerStatus("foobar", "foobar message", function () {
+            return true;
+        });
+        $status->registerStatus("foobar2", "error message", function () {
+            return false;
+        });
+        $this->assertEquals("error", $status->getStatusOverview());
     }
 
     public function testStatusArray()
     {
-        $actual = AppStatus::instance()->getStatusArray();
+        $status = AppStatus::instance();
+        $status->registerStatus("foobar", "foobar message", function () {
+            return true;
+        });
+        $status->registerStatus("foobar2", "error message", function () {
+            return false;
+        });
+        $actual = $status->getStatusArray();
         $expected = [
             "application" => [
                 "name" => "foobar",

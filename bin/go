@@ -5,6 +5,10 @@ goal_test() {
   ${SCRIPT_DIR}/../vendor/bin/phpunit --colors=always ${SCRIPT_DIR}/../tests
 }
 
+goal_mutation_test() {
+  ${SCRIPT_DIR}/../vendor/bin/infection --no-interaction --threads=1
+}
+
 goal_lint_check() {
   ${SCRIPT_DIR}/../vendor/bin/php-cs-fixer check
 }
@@ -14,10 +18,10 @@ goal_lint_fix() {
 }
 
 goal_check() {
-  goal_lint_check
-  goal_static_analysis
-  goal_security_check
-  goal_test
+  goal_lint_check || return $?
+  goal_static_analysis || return $?
+  goal_security_check || return $?
+  goal_test || return $?
 }
 
 goal_static_analysis() {
@@ -34,6 +38,7 @@ task can be:
     help             -- This help message
     install          -- Installs all dependencies
     test             -- Runs all tests
+    mutation         -- Runs mutation tests with Infection (xdebug for coverage)
     security-check   -- Scans code and dependencies (via Docker)
     lint-check       -- Checks code style (no changes)
     lint             -- Fixes code style (auto-fix)
@@ -47,6 +52,8 @@ if [ "$1" == "help" ]; then
     help
 elif [ "$1" == "test" ]; then
     goal_test
+elif [ "$1" == "mutation" ]; then
+    goal_mutation_test
 elif [ "$1" == "security-check" ]; then
     goal_security_check
 elif [ "$1" == "static-analysis" ]; then

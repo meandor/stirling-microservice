@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 class TestingConfig extends Config
 {
-    public static function destroy()
+    public static function destroy(): void
     {
         parent::$instance = null;
     }
@@ -16,6 +16,11 @@ class TestingConfig extends Config
 class ConfigTest extends TestCase
 {
     public const CONFIG_JSON = __DIR__ . "/../resources/default.json";
+
+    protected function setUp(): void
+    {
+        TestingConfig::destroy();
+    }
 
     protected function tearDown(): void
     {

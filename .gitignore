@@ -10,3 +10,8 @@
 # PHPStan configuration
 /.php-cs-fixer.dist.php
 /.phpstan.cache
+
+/.phpunit.cache
+coverage-xml
+junit.xml
+
