@@ -54,7 +54,14 @@ To statically analyse the code with PHPStan (level 4, checks `src/`):
 ./bin/go static-analysis
 ````
 
-To run lint-check, static-analysis, security-check and the unit tests all at once:
+To check that no method exceeds the configured cyclomatic complexity threshold
+(uses PHPMD):
+````bash
+./bin/go complexity
+````
+
+To run lint-check, static-analysis, security-check, the complexity check and the
+unit tests all at once:
 ````bash
 ./bin/go check
 ````
