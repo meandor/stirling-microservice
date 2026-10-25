@@ -15,7 +15,7 @@ goal_mutation() {
 }
 
 goal_mutation_check() {
-  ${PROJECT_ROOT}/vendor/bin/infection --no-interaction --threads=1 --min-msi=60
+  ${PROJECT_ROOT}/vendor/bin/infection --no-interaction --threads=1 --min-msi=85
 }
 
 goal_lint_check() {
