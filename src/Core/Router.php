@@ -45,30 +45,36 @@ class Router
 
     public static function run()
     {
-        header("Access-Control-Allow-Origin: *");
-        header("Access-Control-Allow-Credentials: true");
-        header("Access-Control-Max-Age: 86400");
+        $corsHandler = new CorsHandler();
+        $corsHandler->addCommonHeaders();
 
         if ($_SERVER["REQUEST_METHOD"] === HttpMethods::OPTIONS) {
-            header("Access-Control-Allow-Methods: GET, PUT, POST, OPTIONS, DELETE");
-            header("Access-Control-Allow-Headers: {$_SERVER["HTTP_ACCESS_CONTROL_REQUEST_HEADERS"]}");
-            exit(0);
+            $corsHandler->handleOptionsRequest();
         }
 
-        $matchingEndpoints = array_filter(self::$routes, function ($route) {
-            $endpointMatches = preg_match($route->getEndpointPattern(), self::$path, $matches);
-            $httpMethodMatches = $route->getHttpMethod() === $_SERVER["REQUEST_METHOD"];
-            return $endpointMatches && $httpMethodMatches;
-        });
-
-        if (!empty($matchingEndpoints)) {
-            $route = array_values($matchingEndpoints)[0];
+        $route = self::matchRoute();
+        if ($route !== null) {
             preg_match($route->getEndpointPattern(), self::$path, $matches);
             array_shift($matches);
             call_user_func_array($route->getCallback(), $matches);
         } else {
             call_user_func_array(self::$notFound->getCallback(), [self::$path]);
         }
+    }
+
+    private static function matchRoute()
+    {
+        $matchingEndpoints = array_filter(self::$routes, function ($route) {
+            $endpointMatches = preg_match($route->getEndpointPattern(), self::$path, $matches);
+            $httpMethodMatches = $route->getHttpMethod() === $_SERVER["REQUEST_METHOD"];
+            return $endpointMatches && $httpMethodMatches;
+        });
+
+        if (empty($matchingEndpoints)) {
+            return null;
+        }
+
+        return array_values($matchingEndpoints)[0];
     }
 
     public static function withAuthentication($username, $password, $callback)
@@ -80,10 +86,7 @@ class Router
                     || $_SERVER["PHP_AUTH_PW"] != $password
             )
             ) {
-                header('WWW-Authenticate: Basic realm="Realm"');
-                header("HTTP/1.0 401 Unauthorized");
-                echo "Not Authorized";
-                exit(0);
+                new UnauthorizedResponse()->send();
             } else {
                 call_user_func($callback);
             }
@@ -103,10 +106,23 @@ class Router
 
     private static function addDefaultRoutes()
     {
+        self::addHealthRoute();
+        self::addAuthenticatedRoutes();
+        self::setNotFound(function () {
+            http_response_code(404);
+            exit(0);
+        });
+    }
+
+    private static function addHealthRoute()
+    {
         self::add("GET", "health", function () {
             echo "HEALTHY";
         });
+    }
 
+    private static function addAuthenticatedRoutes()
+    {
         $config = Config::instance();
         $maintenanceCredentials = self::getCredentials($config);
         $username = $maintenanceCredentials["username"];
@@ -119,10 +135,5 @@ class Router
         self::add("GET", "status", self::withAuthentication($username, $password, function () {
             AppStatus::instance()->buildStatusPage();
         }));
-
-        self::setNotFound(function () {
-            http_response_code(404);
-            exit(0);
-        });
     }
 }

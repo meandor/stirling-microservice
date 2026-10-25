@@ -20,7 +20,6 @@ class Route
     {
         $this->httpMethod = $httpMethod;
         $this->endpointPattern = '#^' . $endpointPattern . '$#';
-        ;
         $this->callback = $callback;
     }
 
