@@ -15,7 +15,7 @@ goal_mutation() {
 }
 
 goal_mutation_check() {
-  ${PROJECT_ROOT}/vendor/bin/infection --no-interaction --threads=1 --min-msi=85
+  ${PROJECT_ROOT}/vendor/bin/infection --no-interaction --threads=1 --min-msi=90 --min-covered-msi=90
 }
 
 goal_lint_check() {
@@ -57,7 +57,7 @@ task can be:
     test             -- Runs all tests
     complexity         -- Checks cyclomatic complexity
     mutation         -- Runs mutation tests with Infection (xdebug for coverage)
-    mutation-check    -- Runs mutation tests with 60% MSI threshold
+    mutation-check    -- Runs mutation tests with 90% MSI threshold
     security-check   -- Scans code and dependencies (via Docker)
     lint-check       -- Checks code style (no changes)
     lint             -- Fixes code style (auto-fix)

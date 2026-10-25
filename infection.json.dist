@@ -6,8 +6,8 @@
             "src"
         ]
     },
-    "minMsi": 85,
-    "minCoveredMsi": 85,
+    "minMsi": 90,
+    "minCoveredMsi": 90,
     "testFramework": "phpunit",
     "initialTestsPhpOptions": "-d xdebug.mode=coverage"
 }

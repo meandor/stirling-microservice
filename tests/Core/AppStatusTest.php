@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 
 class AppStatusTest extends TestCase
 {
+    use SubprocessRunner;
+
     public const okStatus = ["name" => "foobar", "description" => "foobar message", "status" => "ok"];
 
     public const errorStatus = ["name" => "foobar2", "description" => "error message", "status" => "error"];
@@ -16,6 +18,46 @@ class AppStatusTest extends TestCase
         Config::destroy();
         TestingConfig::instance(__DIR__ . "/../resources/default.json");
         AppStatus::instance()->reset();
+    }
+
+    public function testStatusBitwiseAssignment()
+    {
+        $status = AppStatus::instance();
+        $status->reset();
+        $status->registerStatus("failing", "failing message", function () {
+            return false;
+        });
+        $status->registerStatus("passing", "passing message", function () {
+            return true;
+        });
+        $this->assertSame("error", $status->getStatusOverview());
+
+        $status->reset();
+        $status->registerStatus("passing", "passing message", function () {
+            return true;
+        });
+        $this->assertSame("ok", $status->getStatusOverview());
+    }
+
+    public function testStatusResponseHeaders()
+    {
+        $path = tempnam(sys_get_temp_dir(), "status_") . ".json";
+        file_put_contents($path, json_encode(["name" => "x","version" => "1","config1" => "v"]));
+        $lines = [
+            '<?php',
+            'namespace Stirling\Core;',
+            'require ' . var_export(phpunit_bootstrap_path(), true) . ';',
+            '$RECORDED = [];',
+            'function header($string) { global $RECORDED; $RECORDED[] = $string; }',
+            '$path = ' . escapeshellarg($path) . ';',
+            'Config::instance($path);',
+            'ob_start();',
+            'AppStatus::instance()->buildStatusPage();',
+            'echo \'RECORDED:\' . implode(chr(44), $RECORDED);',
+        ];
+        $result = $this->runSubprocessLines($lines);
+        $this->assertStringContainsString("Content-Type: application/json", $result["stdout"]);
+        @unlink($path);
     }
 
     public function testSingletonAppStatus()

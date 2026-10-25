@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 
 class RouterTest extends TestCase
 {
+    use SubprocessRunner;
+
     protected function setUp(): void
     {
         Router::$routes = [];
@@ -57,20 +59,6 @@ class RouterTest extends TestCase
         $this->assertSame("", Router::$path);
     }
 
-    public function testRunMatchesRoute()
-    {
-        Router::add("GET", "greet/(.+)", function ($name) {
-            echo "hello {$name}";
-        });
-        $_SERVER["REQUEST_METHOD"] = "GET";
-        $_SERVER["REQUEST_URI"] = "/greet/world";
-        ob_start();
-        Router::init();
-        Router::run();
-        $output = ob_get_clean();
-        $this->assertStringContainsString("hello", $output);
-    }
-
     public function testRunHealthRoute()
     {
         $_SERVER["REQUEST_METHOD"] = "GET";
@@ -108,8 +96,7 @@ class RouterTest extends TestCase
 
     public function testRunInfoRouteWithValidCredentials()
     {
-        $path = tempnam(sys_get_temp_dir(), "cfg_") . ".json";
-        file_put_contents($path, json_encode(["maintenanceUser" => "admin", "maintenancePassword" => "secret"]));
+        $path = $this->createMaintenanceConfig();
         Config::instance($path);
         $_SERVER["REQUEST_METHOD"] = "GET";
         $_SERVER["REQUEST_URI"] = "/info";
@@ -132,8 +119,7 @@ class RouterTest extends TestCase
 
     public function testInitWithCredentialsConfiguresAuthenticatedRoutes()
     {
-        $path = tempnam(sys_get_temp_dir(), "cfg_") . ".json";
-        file_put_contents($path, json_encode(["maintenanceUser" => "admin", "maintenancePassword" => "secret"]));
+        $path = $this->createMaintenanceConfig();
         Config::instance($path);
         ob_start();
         $_SERVER["REQUEST_URI"] = "/";
@@ -145,13 +131,16 @@ class RouterTest extends TestCase
 
     public function testRunOptionsMethodExits()
     {
-        $autoload = dirname(__DIR__, 2) . "/vendor/autoload.php";
         $lines = [
             '<?php',
-            "require '$autoload';",
-            'use Stirling\Core\Router;',
+            'namespace Stirling\Core;',
+            'require ' . var_export(phpunit_bootstrap_path(), true) . ';',
+            '$RECORDED = [];',
+            'function header($string) { global $RECORDED; $RECORDED[] = $string; }',
             '$_SERVER[\'REQUEST_METHOD\'] = \'OPTIONS\';',
             '$_SERVER[\'REQUEST_URI\'] = \'/\';',
+            '$_SERVER[\'HTTP_ACCESS_CONTROL_REQUEST_HEADERS\'] = \'X-Test\';',
+            'register_shutdown_function(function () { global $RECORDED; echo \'RECORDED:\' . implode(chr(44), $RECORDED); });',
             'ob_start();',
             'Router::init();',
             'Router::run();',
@@ -160,14 +149,120 @@ class RouterTest extends TestCase
         $result = $this->runSubprocessLines($lines);
         $this->assertSame(0, $result["exitCode"]);
         $this->assertStringNotContainsString("AFTER", $result["stdout"]);
+        $this->assertStringContainsString("Access-Control-Allow-Origin: *", $result["stdout"]);
+        $this->assertStringContainsString("Access-Control-Allow-Credentials: true", $result["stdout"]);
+        $this->assertStringContainsString("Access-Control-Max-Age: 86400", $result["stdout"]);
+        $this->assertStringContainsString("Access-Control-Allow-Methods: GET, PUT, POST, OPTIONS, DELETE", $result["stdout"]);
+    }
+
+    public function testRouteMatchingCallbackArguments()
+    {
+        Router::add("GET", "greet/(.+)", function ($name) {
+            echo "hello {$name}";
+        });
+        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER["REQUEST_URI"] = "/greet/world";
+        ob_start();
+        Router::init();
+        Router::run();
+        $output = ob_get_clean();
+        $this->assertSame("hello world", $output);
+    }
+
+    public function testNotFoundHandlerReceivesPath()
+    {
+        $lines = [
+            '<?php',
+            'require ' . var_export(phpunit_bootstrap_path(), true) . ';',
+            'use Stirling\Core\Router;',
+            '$_SERVER[\'REQUEST_METHOD\'] = \'GET\';',
+            '$_SERVER[\'REQUEST_URI\'] = \'/missing\';',
+            'ob_start();',
+            'Router::init();',
+            'Router::setNotFound(function ($path) {',
+            '    echo \'NOTFOUND:\' . $path;',
+            '});',
+            'Router::run();',
+            "echo 'AFTER';",
+        ];
+        $result = $this->runSubprocessLines($lines);
+        $this->assertStringContainsString("NOTFOUND:missing", $result["stdout"]);
+    }
+
+    public function testAuthGuardDeniesOnPasswordMismatch()
+    {
+        $result = $this->runAuthGuard("admin", "secret", ["PHP_AUTH_USER" => "admin", "PHP_AUTH_PW" => "wrong"]);
+
+        $this->assertSame(0, $result["exitCode"]);
+        $this->assertStringContainsString("Not Authorized", $result["stdout"]);
+        $this->assertStringNotContainsString("ALLOWED", $result["stdout"]);
+    }
+
+    public function testAuthGuardDeniesOnUsernameMismatch()
+    {
+        $result = $this->runAuthGuard("admin", "secret", ["PHP_AUTH_USER" => "wrong", "PHP_AUTH_PW" => "secret"]);
+
+        $this->assertSame(0, $result["exitCode"]);
+        $this->assertStringContainsString("Not Authorized", $result["stdout"]);
+        $this->assertStringNotContainsString("ALLOWED", $result["stdout"]);
+    }
+
+    public function testAuthGuardDeniesWhenCredentialsAreMissing()
+    {
+        $result = $this->runAuthGuard("admin", "secret", []);
+
+        $this->assertSame(0, $result["exitCode"]);
+        $this->assertStringContainsString("Not Authorized", $result["stdout"]);
+        $this->assertStringNotContainsString("ALLOWED", $result["stdout"]);
+    }
+
+    public function testAuthGuardAllowsWhenUsernameIsEmpty()
+    {
+        $result = $this->runAuthGuard("", "secret", ["PHP_AUTH_USER" => "attacker", "PHP_AUTH_PW" => "secret"]);
+
+        $this->assertSame(0, $result["exitCode"]);
+        $this->assertStringContainsString("ALLOWED", $result["stdout"]);
+        $this->assertStringNotContainsString("Not Authorized", $result["stdout"]);
+    }
+
+    public function testAuthGuardAllowsWhenPasswordIsEmpty()
+    {
+        $result = $this->runAuthGuard("admin", "", ["PHP_AUTH_USER" => "admin", "PHP_AUTH_PW" => "attacker"]);
+
+        $this->assertSame(0, $result["exitCode"]);
+        $this->assertStringContainsString("ALLOWED", $result["stdout"]);
+        $this->assertStringNotContainsString("Not Authorized", $result["stdout"]);
+    }
+
+    public function testStatusRouteExits()
+    {
+        $path = $this->createMaintenanceConfig();
+        $lines = [
+            '<?php',
+            'require ' . var_export(phpunit_bootstrap_path(), true) . ';',
+            'use Stirling\Core\Config;',
+            'Config::instance(' . escapeshellarg($path) . ');',
+            'use Stirling\Core\Router;',
+            '$_SERVER[\'REQUEST_METHOD\'] = \'GET\';',
+            '$_SERVER[\'REQUEST_URI\'] = \'/status\';',
+            '$_SERVER[\'PHP_AUTH_USER\'] = \'admin\';',
+            '$_SERVER[\'PHP_AUTH_PW\'] = \'secret\';',
+            'ob_start();',
+            'Router::init();',
+            'Router::run();',
+            "echo 'AFTER';",
+        ];
+        $result = $this->runSubprocessLines($lines);
+        $this->assertSame(0, $result["exitCode"]);
+        $this->assertStringContainsString("\"statusDetails\":[]", $result["stdout"]);
+        @unlink($path);
     }
 
     public function testRunWithAuthenticationFailureExits()
     {
-        $autoload = dirname(__DIR__, 2) . "/vendor/autoload.php";
         $lines = [
             '<?php',
-            "require '$autoload';",
+            'require ' . var_export(phpunit_bootstrap_path(), true) . ';',
             '$closure = Stirling\Core\Router::withAuthentication(\'admin\', \'secret\', function () {',
             "    echo 'SHOULD-NOT-RUN';",
             '});',
@@ -185,10 +280,9 @@ class RouterTest extends TestCase
 
     public function testRunDefaultNotFoundExits()
     {
-        $autoload = dirname(__DIR__, 2) . "/vendor/autoload.php";
         $lines = [
             '<?php',
-            "require '$autoload';",
+            'require ' . var_export(phpunit_bootstrap_path(), true) . ';',
             'use Stirling\Core\Router;',
             '$_SERVER[\'REQUEST_METHOD\'] = \'GET\';',
             '$_SERVER[\'REQUEST_URI\'] = \'/nonexistent\';',
@@ -202,28 +296,31 @@ class RouterTest extends TestCase
         $this->assertStringNotContainsString("AFTER", $result["stdout"]);
     }
 
-    private function runSubprocessLines(array $lines): array
+    private function createMaintenanceConfig(): string
     {
-        $script = implode("\n", $lines) . "\n";
-        $file = tempnam(sys_get_temp_dir(), "router_probe_");
-        file_put_contents($file, $script);
-        $command = escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($file);
-        $descriptors = [
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
+        $path = tempnam(sys_get_temp_dir(), "cfg_") . ".json";
+        file_put_contents($path, json_encode(["maintenanceUser" => "admin", "maintenancePassword" => "secret"]));
+        return $path;
+    }
+
+    private function runAuthGuard(string $username, string $password, array $credentials): array
+    {
+        $lines = [
+            '<?php',
+            'namespace Stirling\\Core;',
+            'require ' . var_export(phpunit_bootstrap_path(), true) . ';',
         ];
-        $process = proc_open($command, $descriptors, $pipes);
-        $this->assertIsResource($process);
-        $stdout = stream_get_contents($pipes[1]);
-        $stderr = stream_get_contents($pipes[2]);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        $exitCode = proc_close($process);
-        @unlink($file);
-        return [
-            'exitCode' => $exitCode,
-            'stdout' => $stdout,
-            'stderr' => $stderr,
-        ];
+        foreach ($credentials as $name => $value) {
+            $lines[] = '$_SERVER[' . var_export($name, true) . '] = ' . var_export($value, true) . ';';
+        }
+        $lines = array_merge($lines, [
+            '$closure = Router::withAuthentication(' . var_export($username, true) . ', ' . var_export($password, true) . ', function () {',
+            "    echo 'ALLOWED';",
+            '});',
+            '$closure();',
+            "echo 'AFTER';",
+        ]);
+
+        return $this->runSubprocessLines($lines);
     }
 }

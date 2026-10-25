@@ -53,13 +53,19 @@ class Router
         }
 
         $route = self::matchRoute();
-        if ($route !== null) {
-            preg_match($route->getEndpointPattern(), self::$path, $matches);
-            array_shift($matches);
-            call_user_func_array($route->getCallback(), $matches);
-        } else {
+        self::dispatch($route);
+    }
+
+    private static function dispatch(?Route $route): void
+    {
+        if ($route === null) {
             call_user_func_array(self::$notFound->getCallback(), [self::$path]);
+            return;
         }
+
+        preg_match($route->getEndpointPattern(), self::$path, $matches);
+        array_shift($matches);
+        call_user_func_array($route->getCallback(), $matches);
     }
 
     private static function matchRoute()
@@ -80,17 +86,27 @@ class Router
     public static function withAuthentication($username, $password, $callback)
     {
         return function () use ($username, $password, $callback) {
-            if ((!empty($username) && !empty($password)) && (
-                !isset($_SERVER["PHP_AUTH_USER"])
-                    || $_SERVER["PHP_AUTH_USER"] != $username
-                    || $_SERVER["PHP_AUTH_PW"] != $password
-            )
-            ) {
-                new UnauthorizedResponse()->send();
-            } else {
+            if (self::hasValidCredentials($username, $password)) {
                 call_user_func($callback);
+                return;
             }
+
+            new UnauthorizedResponse()->send();
         };
+    }
+
+    private static function hasValidCredentials($username, $password): bool
+    {
+        if (empty($username) || empty($password)) {
+            return true;
+        }
+
+        if (!isset($_SERVER["PHP_AUTH_USER"])) {
+            return false;
+        }
+
+        return $_SERVER["PHP_AUTH_USER"] == $username
+            && ($_SERVER["PHP_AUTH_PW"] ?? null) == $password;
     }
 
     private static function getCredentials($config)

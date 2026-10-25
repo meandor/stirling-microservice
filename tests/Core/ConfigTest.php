@@ -22,6 +22,31 @@ class ConfigTest extends TestCase
         file_put_contents(self::CONFIG_JSON, "{}");
     }
 
+    public function testDefaultConfigPathMaterializes()
+    {
+        $defaultPath = __DIR__ . "/../../resources/default.json";
+        $backup = file_exists($defaultPath) ? file_get_contents($defaultPath) : null;
+
+        try {
+            if (!is_dir(dirname($defaultPath))) {
+                mkdir(dirname($defaultPath), 0o777, true);
+            }
+            file_put_contents($defaultPath, json_encode(["config1" => "materialized"]));
+            TestingConfig::destroy();
+
+            $config = TestingConfig::instance();
+
+            $this->assertEquals("materialized", $config->config1);
+        } finally {
+            TestingConfig::destroy();
+            if ($backup === null) {
+                @unlink($defaultPath);
+            } else {
+                file_put_contents($defaultPath, $backup);
+            }
+        }
+    }
+
     public function testCreateConfigSingleton()
     {
         $expected = TestingConfig::instance(self::CONFIG_JSON);

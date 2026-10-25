@@ -6,6 +6,15 @@ use PHPUnit\Framework\TestCase;
 
 class ConfigurationMaskerTest extends TestCase
 {
+    public function testMaskIntegerKey()
+    {
+        $masker = new ConfigurationMasker();
+
+        $actual = $masker->mask([123 => "hunter2"]);
+
+        $this->assertEquals([123 => "hunter2"], $actual);
+    }
+
     public function testFlatSensitiveKeyIsMasked()
     {
         $masker = new ConfigurationMasker();
