@@ -58,7 +58,7 @@ class AppStatus
                 "name" => $config->name,
                 "version" => $config->version],
             "git" => $config->git,
-            "configuration" => $config->getConfigMap(),
+            "configuration" => new ConfigurationMasker()->mask($config->getConfigMap()),
             "status" => $this->getStatusOverview(),
             "statusDetails" => $this->aggregateStatusDetails()];
         return $status;

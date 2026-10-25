@@ -111,6 +111,31 @@ class AppStatusTest extends TestCase
         $this->assertEquals("error", $status->getStatusOverview());
     }
 
+    public function testSensitiveConfigurationValueIsMasked()
+    {
+        file_put_contents(__DIR__ . "/../resources/default.json", "{\"name\":\"foobar\",\"version\":\"1.3.3.7\",\"db_password\":\"hunter2\"}");
+        TestingConfig::destroy();
+        TestingConfig::instance(__DIR__ . "/../resources/default.json");
+
+        $actual = AppStatus::instance()->getStatusArray();
+
+        $this->assertEquals("********", $actual["configuration"]["db_password"]);
+    }
+
+    public function testBuildStatusPageJsonContainsNoPlaintextSecret()
+    {
+        file_put_contents(__DIR__ . "/../resources/default.json", "{\"name\":\"foobar\",\"version\":\"1.3.3.7\",\"db_password\":\"hunter2\"}");
+        TestingConfig::destroy();
+        TestingConfig::instance(__DIR__ . "/../resources/default.json");
+
+        ob_start();
+        AppStatus::instance()->buildStatusPage();
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString("********", $output);
+        $this->assertStringNotContainsString("hunter2", $output);
+    }
+
     public function testStatusArray()
     {
         $status = AppStatus::instance();
